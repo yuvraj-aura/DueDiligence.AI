@@ -1,0 +1,17 @@
+[project]
+name = "ai-due-diligence"
+version = "0.1.0"
+description = "AI Due Diligence Layer Agent"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk>=2.0.0,<2.1.0",
+    "google-generativeai",
+    "fastapi",
+    "uvicorn",
+    "asyncpg",
+    "httpx",
+    "pydantic>=2.0.0,<3.0.0",
+    "redis",
+    "python-dotenv",
+]

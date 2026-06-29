@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Startup Due Diligence Portal</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="pulse-icon"></span>
+                <h1>DueDiligence<span>.AI</span></h1>
+            </div>
+            <div class="header-badge">Sprint 6 Final Release</div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            
+            <!-- VIEW 1: Input Setup Form -->
+            <section id="form-view" class="card active">
+                <div class="card-header">
+                    <h2>Validate Your Startup Idea</h2>
+                    <p>Enter your thesis and market parameters. Our autonomous 5-agent pipeline will validate your thesis against real world competitors, Reddit sentiments, and financial unit economics.</p>
+                </div>
+                <form id="validate-form" class="due-form">
+                    <!-- Step 1: Pre-Flight Check -->
+                    <div id="step-1-container">
+                        <div class="form-group">
+                            <label for="thesis">Startup Thesis / Pitch</label>
+                            <textarea id="thesis" required placeholder="Example: A SaaS invoicing platform for freelance graphic designers that automates client reminders..."></textarea>
+                            <div class="char-counter" style="text-align: right; font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                                <span id="thesis-char-count">0</span> / 80 characters minimum
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="target_micro_niche">Target Micro-Niche</label>
+                                <input type="text" id="target_micro_niche" required placeholder="e.g., AI note-taking for indie developer consultants">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Monetization Model (Select all that apply)</label>
+                            <div class="monetization-checkbox-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; margin: 0.5rem 0 1rem 0;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="Flat"> Flat</label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="Usage"> Usage</label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="Freemium"> Freemium</label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="Seat-Based"> Seat-Based</label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="Marketplace"> Marketplace</label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="One-Time"> One-Time</label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem;"><input type="checkbox" name="monetization_model" value="Hybrid"> Hybrid</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pricing_description">Describe your pricing briefly</label>
+                            <input type="text" id="pricing_description" required placeholder="e.g., $10/mo flat fee per user, custom enterprise pricing">
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <button type="button" id="run-pre-flight" class="btn btn-primary" style="width: 100%;">Run Pre-Flight Check</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Deep Validation (hidden by default) -->
+                    <div id="step-2-container" style="display: none; border-top: 1px solid var(--border-color); margin-top: 2rem; padding-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: var(--success);">✓ Pre-Flight Passed: Unlock Deep Validation</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group" id="price-point-group" style="display: none;">
+                                <label for="target_price_point">Target Price Point ($ per month)</label>
+                                <input type="number" id="target_price_point" placeholder="e.g., 29">
+                            </div>
+                            <div class="form-group">
+                                <label for="target_customer_persona">Target Customer Persona</label>
+                                <input type="text" id="target_customer_persona" required placeholder="e.g., Solo freelancers making under $50K, or Enterprise B2B teams">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="marketing_budget_usd">Marketing Budget ($)</label>
+                                <input type="number" id="marketing_budget_usd" required placeholder="e.g., 500">
+                            </div>
+                            <div class="form-group">
+                                <label for="development_runway_weeks">Development Runway</label>
+                                <select id="development_runway_weeks" required>
+                                    <option value="4">4 Weeks</option>
+                                    <option value="8">8 Weeks</option>
+                                    <option value="12" selected>12 Weeks</option>
+                                    <option value="16">16 Weeks</option>
+                                    <option value="24">24 Weeks</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="team_size">Team Size</label>
+                                <select id="team_size" required>
+                                    <option value="Solo">Solo Developer</option>
+                                    <option value="2-person">2-Person Team</option>
+                                    <option value="3-5 person">3-5 Person Team</option>
+                                    <option value="6+">6+ Person Team</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="target_geography">Target Geography</label>
+                                <select id="target_geography" required>
+                                    <option value="Global">Global</option>
+                                    <option value="North America">North America (NA)</option>
+                                    <option value="Europe">Europe (EU)</option>
+                                    <option value="Asia Pacific">Asia Pacific (APAC)</option>
+                                    <option value="Latin America">Latin America (LATAM)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="align-items: flex-end;">
+                            <div class="form-group">
+                                <label for="current_stage">Current Stage & Traction</label>
+                                <select id="current_stage" required>
+                                    <option value="Idea">Idea Stage</option>
+                                    <option value="Prototyping">Prototyping / MVP</option>
+                                    <option value="Waitlist">Waitlist / Pre-revenue</option>
+                                    <option value="Revenue">Generating Revenue</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="waitlist-size-group" style="display: none;">
+                                <label for="waitlist_size">Waitlist Size</label>
+                                <input type="number" id="waitlist_size" placeholder="e.g., 500">
+                            </div>
+                            <div class="form-group" id="current-mrr-group" style="display: none;">
+                                <label for="current_mrr">Current MRR ($)</label>
+                                <input type="number" id="current_mrr" placeholder="e.g., 2000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="unfair_advantage">Unfair Advantage</label>
+                            <textarea id="unfair_advantage" required placeholder="What do you have that a well-funded competitor cannot easily replicate?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="known_competitors">Known Competitors</label>
+                            <input type="text" id="known_competitors" placeholder="e.g., Notion AI, Obsidian (Comma-separated)">
+                            <small style="display: block; color: var(--text-secondary); margin-top: 0.25rem; font-style: italic;">
+                                (Leave blank if unknown — the Researcher will find them)
+                            </small>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <button type="submit" id="submit-pipeline" class="btn btn-success" style="width: 100%; background-color: var(--success);">Begin Full Analysis Pipeline</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- VIEW 2: Pipeline status tracker -->
+            <section id="tracker-view" class="card">
+                <div class="tracker-header">
+                    <div class="spinner"></div>
+                    <h2>Running Validation Pipeline</h2>
+                    <p>Session ID: <span id="active-session-id" class="code-text"></span></p>
+                </div>
+                
+                <div class="pipeline-steps">
+                    <div class="step-card" id="step-gatekeeper">
+                        <div class="step-icon">01</div>
+                        <div class="step-details">
+                            <h3>Agent 01: Gatekeeper</h3>
+                            <p class="step-desc">Normalizing raw input metrics & verifying assumptions</p>
+                            <span class="badge status">Waiting</span>
+                        </div>
+                    </div>
+                    <div class="step-card" id="step-researcher">
+                        <div class="step-icon">02</div>
+                        <div class="step-details">
+                            <h3>Agent 02: Researcher</h3>
+                            <p class="step-desc">Parallel web searches, Product Hunt launches & Reddit sentiment</p>
+                            <span class="badge status">Waiting</span>
+                        </div>
+                    </div>
+                    <div class="step-card" id="step-numbers">
+                        <div class="step-icon">03</div>
+                        <div class="step-details">
+                            <h3>Agent 03: Numbers Engine</h3>
+                            <p class="step-desc">Calculating LTV, CAC and financial viability ratios</p>
+                            <span class="badge status">Waiting</span>
+                        </div>
+                    </div>
+                    <div class="step-card" id="step-critic">
+                        <div class="step-icon">04</div>
+                        <div class="step-details">
+                            <h3>Agent 04: Failsafe Critic</h3>
+                            <p class="step-desc">Running deterministic economic & citation verification gates</p>
+                            <span class="badge status">Waiting</span>
+                        </div>
+                    </div>
+                    <div class="step-card" id="step-builder">
+                        <div class="step-icon">05</div>
+                        <div class="step-details">
+                            <h3>Agent 05: Builder</h3>
+                            <p class="step-desc">Compiling 90-day task roadmaps & risk matrices</p>
+                            <span class="badge status">Waiting</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: Kill Screen -->
+            <section id="kill-view" class="card border-kill">
+                <div class="kill-hero">
+                    <div class="kill-icon">☠</div>
+                    <h2 class="kill-title">Thesis Rejected & Killed</h2>
+                    <p class="kill-subtitle">Your idea did not clear the Critic's deterministic viability gates.</p>
+                </div>
+                
+                <div class="kill-card-body">
+                    <div class="kill-stat-box">
+                        <span class="kill-label">Kill Reason Code</span>
+                        <h3 id="kill-reason-code" class="kill-code">KILL: UNIT_ECON_BROKEN</h3>
+                    </div>
+
+                    <!-- Section 1: The Plain-English Translation -->
+                    <div class="kill-section">
+                        <h4>1. Plain-English Translation</h4>
+                        <p id="kill-plain-translation" class="kill-desc-box"></p>
+                    </div>
+
+                    <!-- Section 2: The Autopsy Report -->
+                    <div class="kill-section">
+                        <h4>2. Autopsy Report (Parameters & Metrics)</h4>
+                        <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1rem;">
+                            <div class="metric-card">
+                                <h5>Estimated CAC</h5>
+                                <div class="metric-val" id="kill-cac">$0.00</div>
+                            </div>
+                            <div class="metric-card">
+                                <h5>Estimated LTV</h5>
+                                <div class="metric-val" id="kill-ltv">$0.00</div>
+                            </div>
+                            <div class="metric-card">
+                                <h5>Assumed Churn Rate</h5>
+                                <div class="metric-val" id="kill-churn">0%</div>
+                            </div>
+                            <div class="metric-card">
+                                <h5>MRR per User</h5>
+                                <div class="metric-val" id="kill-mrr">$0.00</div>
+                            </div>
+                            <div class="metric-card" id="kill-ratio-card">
+                                <h5>Viability Ratio</h5>
+                                <div class="metric-val" id="kill-ratio">0.00</div>
+                                <small style="display: block; color: var(--danger); margin-top: 0.25rem; font-weight: 500;">Minimum required: 3.0×</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: The Hard Evidence -->
+                    <div class="kill-section">
+                        <h4>3. Hard Evidence (Scraper Context)</h4>
+                        <div class="evidence-stats">
+                            <div><strong>Saturation Score:</strong> <span id="kill-sat-score">0.0</span></div>
+                            <div><strong>Active Competitors Found:</strong> <span id="kill-comp-count">0</span></div>
+                            <div>
+                                <strong>Reddit Sentiment Delta:</strong> <span id="kill-reddit-sentiment">0.00</span>
+                                <div id="kill-reddit-interpretation" style="font-size: 0.9rem; margin-top: 0.25rem; font-style: italic; color: var(--text-secondary); max-width: 600px; line-height: 1.4;"></div>
+                            </div>
+                        </div>
+                        <h5 class="evidence-sub">Competitor Sources Cited:</h5>
+                        <ul id="kill-competitor-links" class="kill-sources-list">
+                            <!-- Clickable links will be dynamically populated -->
+                        </ul>
+                    </div>
+
+                    <!-- Section 4: The Pivot Matrix -->
+                    <div class="kill-section">
+                        <h4>4. Alternative Scenarios (Pivot Options)</h4>
+                        <div id="kill-pivot-matrix" class="pivot-matrix-box">
+                            <!-- Actions/Pivots will be dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Section 5: The Single Highest-Leverage Action -->
+                    <div class="kill-section kill-leverage-callout">
+                        <h4>5. Single Highest-Leverage Action</h4>
+                        <div id="kill-high-leverage-action" class="leverage-content">
+                            <!-- One critical focus action recommendation -->
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-secondary" id="kill-restart-btn">Stress-Test a Pivot</button>
+                </div>
+            </section>
+
+            <!-- VIEW 4: Report dashboard & Roadmap views -->
+            <section id="report-view" class="card no-padding">
+                <div class="report-tabs">
+                    <button class="tab-btn active" data-tab="tab-dashboard">Market Dashboard</button>
+                    <button class="tab-btn" data-tab="tab-roadmap">90-Day Roadmap</button>
+                    <button class="tab-btn" data-tab="tab-sources">Cited Sources</button>
+                </div>
+
+                <div class="report-tab-content">
+                    
+                    <!-- Sub-view 1: Market Dashboard -->
+                    <div id="tab-dashboard" class="tab-pane active">
+                        <div class="dashboard-grid">
+                            
+                            <!-- Key Performance Indicators -->
+                            <div class="grid-card full-width">
+                                <h3>Thesis Confirmation Summary</h3>
+                                <p id="thesis-confirmation-text" class="confirmation-summary-text"></p>
+                            </div>
+
+                            <div class="grid-card">
+                                <h3>Market Saturation Score</h3>
+                                <div class="score-circle-container">
+                                    <div class="score-circle" id="report-sat-score">0.0</div>
+                                    <p class="score-desc" id="report-sat-desc">Low Competition Risk</p>
+                                </div>
+                            </div>
+
+                            <div class="grid-card">
+                                <h3>Unit Economics</h3>
+                                <div class="econ-list">
+                                    <div class="econ-item">
+                                        <span>Estimated CAC</span>
+                                        <strong id="report-cac">$0.00</strong>
+                                    </div>
+                                    <div class="econ-item">
+                                        <span>Estimated LTV</span>
+                                        <strong id="report-ltv">$0.00</strong>
+                                    </div>
+                                    <div class="econ-item border-top">
+                                        <span>Viability Ratio</span>
+                                        <strong id="report-viability-ratio">0.00</strong>
+                                    </div>
+                                    <div class="econ-item">
+                                        <span>Status Badge</span>
+                                        <span class="badge pass-badge" id="report-viability-status">VIABLE</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-card full-width">
+                                <h3>Risks & Mitigations Matrix (Top 5)</h3>
+                                <table class="table" id="risks-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Risk Description</th>
+                                            <th>Probability</th>
+                                            <th>Impact Score</th>
+                                            <th>Risk Tier</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamically generated -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="grid-card full-width">
+                                <h3>Monetization & Projections</h3>
+                                <div class="projections-container">
+                                    <div class="proj-box">
+                                        <span>Average MRR per User</span>
+                                        <h4 id="report-mrr">$0.00</h4>
+                                    </div>
+                                    <div class="proj-box">
+                                        <span>Month 3 Projections</span>
+                                        <h4 id="report-mrr-3mo">$0.00</h4>
+                                    </div>
+                                    <div class="proj-box">
+                                        <span>Month 6 Projections</span>
+                                        <h4 id="report-mrr-6mo">$0.00</h4>
+                                    </div>
+                                    <div class="proj-box">
+                                        <span>Month 12 Projections</span>
+                                        <h4 id="report-mrr-12mo">$0.00</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-view 2: 90-Day Roadmap -->
+                    <div id="tab-roadmap" class="tab-pane">
+                        <div class="roadmap-header">
+                            <h3>90-Day Action Calendar</h3>
+                            <p>Select a week below to view your daily tasks, assigned owner, and key deliverables.</p>
+                            <div class="week-selector" id="week-selector-buttons">
+                                <!-- Generated -->
+                            </div>
+                        </div>
+                        <div class="roadmap-tasks-list" id="week-tasks-container">
+                            <!-- Selected week tasks show here -->
+                        </div>
+                    </div>
+
+                    <!-- Sub-view 3: Cited Sources -->
+                    <div id="tab-sources" class="tab-pane">
+                        <h3>Cited Sources Index</h3>
+                        <p>The following real-world sources were referenced by our scraper during validation:</p>
+                        <ul class="sources-list-links" id="sources-list-container">
+                            <!-- List -->
+                        </ul>
+                    </div>
+
+                </div>
+                <div class="report-footer">
+                    <button class="btn btn-secondary restart-btn">Validate Another Thesis</button>
+                </div>
+            </section>
+
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 DueDiligence.AI Layer. Running offline SQLite & caching fallbacks.</p>
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>

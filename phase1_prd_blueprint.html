@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 1 PRD — AI Due Diligence Layer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --black:       #0A0A0B;
+    --surface:     #111114;
+    --panel:       #18181C;
+    --border:      #27272D;
+    --border-soft: #1F1F24;
+    --acid:        #C6FF00;
+    --acid-dim:    #8FB500;
+    --acid-bg:     #0D1A00;
+    --red:         #FF3B3B;
+    --red-bg:      #1A0000;
+    --amber:       #FFAA00;
+    --amber-bg:    #1A1000;
+    --cyan:        #00D4D4;
+    --cyan-bg:     #001A1A;
+    --purple:      #A78BFA;
+    --purple-bg:   #0F0A1A;
+    --text-primary:   #F0F0F2;
+    --text-secondary: #8A8A94;
+    --text-muted:     #4A4A54;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .page { max-width: 1020px; margin: 0 auto; padding: 60px 32px 120px; }
+
+  /* HEADER */
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 44px; margin-bottom: 60px; }
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    color: var(--acid); text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 4.5vw, 44px);
+    font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+  }
+  h1 span { color: var(--acid); }
+  .header-sub {
+    font-size: 14px; color: var(--text-secondary);
+    font-weight: 300; margin-top: 14px; max-width: 680px; line-height: 1.7;
+  }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.14em;
+    padding: 4px 10px; border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .badge-acid  { border: 1px solid var(--acid-dim); color: var(--acid); }
+  .badge-amber { border: 1px solid #665000; color: var(--amber); background: var(--amber-bg); }
+  .badge-cyan  { border: 1px solid #004444; color: var(--cyan); background: var(--cyan-bg); }
+  .badge-red   { border: 1px solid #500000; color: var(--red); background: var(--red-bg); }
+
+  /* SECTION */
+  .section { margin-bottom: 56px; }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* SPRINT BLOCK */
+  .sprint {
+    border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .sprint-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center; gap: 16px;
+    padding: 16px 22px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  .sprint-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em;
+    color: var(--text-muted);
+  }
+  .sprint-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px; font-weight: 600;
+    color: var(--text-primary);
+  }
+  .sprint-dur {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--acid);
+    letter-spacing: 0.1em; white-space: nowrap;
+  }
+  .sprint-body { padding: 22px; }
+  .sprint-body p {
+    color: var(--text-secondary); font-size: 13.5px;
+    line-height: 1.75; margin-bottom: 16px;
+  }
+
+  /* TASK LIST */
+  .task-list { list-style: none; }
+  .task-list li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13.5px; color: var(--text-secondary);
+    align-items: start;
+  }
+  .task-list li:last-child { border-bottom: none; }
+  .task-list li::before {
+    content: '›';
+    color: var(--acid); font-weight: 700;
+    font-size: 15px; line-height: 1.4;
+  }
+  .task-list li strong { color: var(--text-primary); }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--acid-dim);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: #B0CC70;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .code-block .comment { color: var(--text-muted); }
+  .code-block .key     { color: var(--acid); }
+  .code-block .val     { color: var(--cyan); }
+  .code-block .str     { color: #FFB060; }
+
+  /* DELIVERABLE TABLE */
+  .del-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .del-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 10px 16px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .del-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text-secondary); vertical-align: top;
+  }
+  .del-table tr:last-child td { border-bottom: none; }
+  .del-table td:first-child { color: var(--text-primary); font-weight: 500; font-size: 13px; }
+  .del-table .owner { font-family:'Space Mono',monospace; font-size:11px; color:var(--acid); }
+  .del-table .pass { color: #5ECC5E; }
+  .del-table .fail { color: var(--red); }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+  }
+  .arch-row {
+    display: flex; align-items: center;
+    gap: 0; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .arch-node {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-primary);
+    text-align: center; min-width: 120px;
+  }
+  .arch-node.acid { border-color: var(--acid-dim); color: var(--acid); background: var(--acid-bg); }
+  .arch-node.cyan { border-color: #004444; color: var(--cyan); background: var(--cyan-bg); }
+  .arch-node.amber { border-color: #554400; color: var(--amber); background: var(--amber-bg); }
+  .arch-node.purple { border-color: #3D2F7A; color: var(--purple); background: var(--purple-bg); }
+  .arch-node.red { border-color: #500000; color: var(--red); background: var(--red-bg); }
+  .arch-node small {
+    display: block; font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em;
+    font-weight: 400; opacity: 0.7; margin-top: 2px;
+  }
+  .arch-arrow {
+    font-size: 16px; color: var(--text-muted);
+    padding: 0 8px; flex-shrink: 0;
+  }
+  .arch-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin: 12px 0 6px;
+  }
+  .arch-divider {
+    border: none; border-top: 1px dashed var(--border);
+    margin: 16px 0;
+  }
+
+  /* DECISION GATE */
+  .gate {
+    background: var(--red-bg);
+    border: 1px solid #500000;
+    border-left: 3px solid var(--red);
+    border-radius: 6px;
+    padding: 18px 22px; margin: 14px 0;
+  }
+  .gate-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    color: var(--red); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .gate p { color: #CC8888; font-size: 13.5px; line-height: 1.7; }
+
+  /* ENV CARD */
+  .env-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .env-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .env-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.16em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .env-card ul { list-style: none; }
+  .env-card ul li {
+    font-size: 12.5px; color: var(--text-secondary);
+    padding: 4px 0; border-bottom: 1px solid var(--border-soft);
+    font-family: 'Space Mono', monospace;
+  }
+  .env-card ul li:last-child { border-bottom: none; }
+
+  /* SCHEMA BLOCK */
+  .schema {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+  .schema-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em;
+    color: var(--cyan); margin-bottom: 10px;
+  }
+
+  /* SUCCESS CRITERIA */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .criteria-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px 18px;
+    text-align: center;
+  }
+  .criteria-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--acid); letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .criteria-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-top: 6px; line-height: 1.5;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 22px 26px; margin-bottom: 10px;
+  }
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--acid); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 8px;
+  }
+  .card p { color: var(--text-secondary); font-size: 13.5px; line-height: 1.75; }
+
+  /* HIGHLIGHT */
+  .hl { color: var(--text-primary); font-weight: 500; }
+  .hl-acid { color: var(--acid); }
+  .hl-amber { color: var(--amber); }
+  .hl-cyan { color: var(--cyan); }
+  .hl-red { color: var(--red); }
+
+  /* IMPORTANT BOX */
+  .important {
+    background: var(--acid-bg);
+    border: 1px solid var(--acid-dim);
+    border-left: 3px solid var(--acid);
+    border-radius: 6px; padding: 18px 22px; margin: 14px 0;
+  }
+  .important-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    color: var(--acid); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .important p { color: #A8C870; font-size: 13.5px; line-height: 1.7; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 52px 0; }
+
+  .footer {
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px; margin-top: 64px;
+    padding-top: 24px; border-top: 1px solid var(--border);
+  }
+  .footer span {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em; color: var(--text-muted);
+  }
+
+  @media(max-width:600px){
+    .page{padding:32px 16px 80px;}
+    .sprint-header{grid-template-columns:1fr auto;}
+    .sprint-num{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="eyebrow">Product Requirements Document · Phase 1</div>
+    <h1>Build Blueprint:<br/><span>AI Due Diligence Layer</span></h1>
+    <p class="header-sub">
+      The exact sequence of what to build, in what order, with what tools — written so that your ADK engineer opens this document and knows where to start on day one. No ambiguity. No "figure it out later."
+    </p>
+    <div class="badge-row">
+      <span class="badge badge-acid">Phase 1 · 0–12 Weeks</span>
+      <span class="badge badge-amber">Target: Working Pipeline End-to-End</span>
+      <span class="badge badge-cyan">Stack: Python · ADK 2.0 · Gemini · MCP</span>
+      <span class="badge badge-red">Google Antigravity: Frontend Only</span>
+    </div>
+  </header>
+
+  <!-- NORTH STAR -->
+  <section class="section">
+    <div class="section-label">Phase 1 North Star</div>
+    <div class="card">
+      <div class="card-title">Definition of Done for Phase 1</div>
+      <p>
+        A user inputs a raw idea. The five-agent pipeline runs sequentially without manual intervention. The Critic either halts with a cited kill reason or passes the idea to the Builder. The Builder outputs a structured 3-month roadmap. Every agent write triggers a telemetry log to the Data Layer. The Antigravity UI renders the final output. <span class="hl">That full loop — working, in production, handling 10 concurrent validations — is Phase 1 complete.</span> Nothing else counts.
+      </p>
+    </div>
+    <div class="important">
+      <div class="important-label">Rule Zero for Every Engineer</div>
+      <p>
+        The Data Layer telemetry write is <strong>not optional</strong> and not a Phase 2 task. Every agent that produces a signal — saturation score, viability ratio, kill reason — must write it anonymized to the database on the same run. If this slips to "later," the moat never compounds. Wire it in on week one, even if the schema is rough.
+      </p>
+    </div>
+  </section>
+
+  <!-- SYSTEM ARCHITECTURE -->
+  <section class="section">
+    <div class="section-label">System Architecture — What Gets Built</div>
+
+    <div class="arch-box">
+      <div class="arch-label">Entry Point</div>
+      <div class="arch-row">
+        <div class="arch-node acid">User Input Form<small>Antigravity UI</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">FastAPI Gateway<small>/validate endpoint</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">ADK Orchestrator<small>Session Manager</small></div>
+      </div>
+
+      <hr class="arch-divider"/>
+      <div class="arch-label">Agent Pipeline (Sequential)</div>
+      <div class="arch-row">
+        <div class="arch-node">Agent 01<small>Gatekeeper</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node cyan">Agent 02<small>Researcher + MCP</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node amber">Agent 03<small>Numbers Engine</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node red">Agent 04<small>Failsafe Critic</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node purple">Agent 05<small>Builder</small></div>
+      </div>
+
+      <hr class="arch-divider"/>
+      <div class="arch-label">Parallel Writes (Every Agent → Data Layer)</div>
+      <div class="arch-row">
+        <div class="arch-node cyan">PostgreSQL<small>Signal Store</small></div>
+        <div class="arch-arrow">←</div>
+        <div class="arch-node">Telemetry Writer<small>Async · Non-blocking</small></div>
+        <div class="arch-arrow">←</div>
+        <div class="arch-node">Each Agent Output<small>Anonymized</small></div>
+      </div>
+
+      <hr class="arch-divider"/>
+      <div class="arch-label">Output Layer</div>
+      <div class="arch-row">
+        <div class="arch-node purple">Builder Output<small>JSON Roadmap</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">Antigravity Trigger<small>UI Render Event</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">Interactive Dashboard<small>Risk · Roadmap · Financials</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEV ENVIRONMENT -->
+  <section class="section">
+    <div class="section-label">Step 0 — Environment Setup (Day 1–2, Both Engineers)</div>
+    <div class="env-grid">
+      <div class="env-card">
+        <div class="env-card-label">Python Environment</div>
+        <ul>
+          <li>Python 3.11+</li>
+          <li>google-adk==2.0.*</li>
+          <li>google-generativeai</li>
+          <li>fastapi + uvicorn</li>
+          <li>asyncpg (DB driver)</li>
+          <li>httpx (async HTTP)</li>
+          <li>pydantic v2</li>
+        </ul>
+      </div>
+      <div class="env-card">
+        <div class="env-card-label">API Keys Needed Day 1</div>
+        <ul>
+          <li>Gemini API key</li>
+          <li>Reddit API (OAuth)</li>
+          <li>Product Hunt API</li>
+          <li>GitHub API token</li>
+          <li>SerpAPI (web scrape)</li>
+        </ul>
+      </div>
+      <div class="env-card">
+        <div class="env-card-label">Infrastructure</div>
+        <ul>
+          <li>PostgreSQL 15+</li>
+          <li>Redis (session cache)</li>
+          <li>Docker Compose (local)</li>
+          <li>Google Cloud Run (prod)</li>
+          <li>Antigravity SDK</li>
+        </ul>
+      </div>
+      <div class="env-card">
+        <div class="env-card-label">Repo Structure</div>
+        <ul>
+          <li>/agents (5 agent files)</li>
+          <li>/mcp_servers (custom)</li>
+          <li>/data_layer (DB + writer)</li>
+          <li>/api (FastAPI gateway)</li>
+          <li>/ui (Antigravity)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block"><span class="comment"># Project scaffold — run this first</span>
+<span class="key">mkdir</span> ai-due-diligence && <span class="key">cd</span> ai-due-diligence
+<span class="key">mkdir</span> -p agents mcp_servers data_layer api ui tests
+
+<span class="comment"># Install core dependencies</span>
+<span class="key">pip install</span> google-adk==2.0.* google-generativeai fastapi uvicorn \
+            asyncpg httpx pydantic redis python-dotenv
+
+<span class="comment"># .env structure (never commit this)</span>
+<span class="key">GEMINI_API_KEY</span>=<span class="str">your_key</span>
+<span class="key">REDDIT_CLIENT_ID</span>=<span class="str">your_key</span>
+<span class="key">PRODUCT_HUNT_TOKEN</span>=<span class="str">your_key</span>
+<span class="key">GITHUB_TOKEN</span>=<span class="str">your_key</span>
+<span class="key">SERPAPI_KEY</span>=<span class="str">your_key</span>
+<span class="key">DATABASE_URL</span>=<span class="str">postgresql+asyncpg://user:pass@localhost/diligence</span>
+<span class="key">REDIS_URL</span>=<span class="str">redis://localhost:6379</span></div>
+  </section>
+
+  <!-- SPRINT 1 -->
+  <section class="section">
+    <div class="section-label">Sprint 1</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-01</div>
+        <div class="sprint-title">Data Layer + FastAPI Gateway</div>
+        <div class="sprint-dur">WEEK 1–2 · Engineer 2 leads</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">Build the database and the API entry point first.</span> Every subsequent agent depends on having a place to write signal data and a gateway to receive user input. This is not exciting work. It is the foundation everything else breaks without.
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Design and migrate the PostgreSQL schema.</strong> Four tables minimum: <code>validation_sessions</code>, <code>saturation_signals</code>, <code>cac_ltv_benchmarks</code>, <code>failure_taxonomy</code>. Add <code>session_hash</code> (SHA-256 of session ID) as the anonymization key on every table from day one.</li>
+          <li><strong>Build the async Telemetry Writer module.</strong> A single <code>write_signal(table, payload)</code> function that every agent calls. Non-blocking. Uses <code>asyncpg</code>. Fails silently with a structured error log — a DB write failure must never crash an agent run.</li>
+          <li><strong>Build the FastAPI gateway.</strong> One endpoint: <code>POST /validate</code>. Accepts the five user inputs (thesis, niche, monetization, constraints, known competitors). Validates with Pydantic. Returns a <code>session_id</code> and kicks off the ADK pipeline asynchronously. Returns status via <code>GET /status/{session_id}</code>.</li>
+          <li><strong>Wire up Redis for session state.</strong> The ADK orchestrator needs to persist agent outputs between pipeline steps. Store intermediate agent outputs keyed by session ID with a 24-hour TTL.</li>
+        </ul>
+
+        <div class="schema">
+          <div class="schema-title">// data_layer/schema.sql — Minimum viable tables</div>
+          <div class="code-block"><span class="key">CREATE TABLE</span> validation_sessions (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_hash  TEXT NOT NULL,          <span class="comment">-- anonymized: SHA256(session_id)</span>
+  niche_slug    TEXT NOT NULL,          <span class="comment">-- normalized niche label</span>
+  pricing_model TEXT NOT NULL,          <span class="comment">-- usage | flat | freemium</span>
+  outcome       TEXT,                   <span class="comment">-- PASSED | KILLED | PENDING</span>
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="key">CREATE TABLE</span> saturation_signals (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_hash    TEXT NOT NULL,
+  niche_slug      TEXT NOT NULL,
+  saturation_score NUMERIC(4,2),        <span class="comment">-- 0.00–10.00</span>
+  competitor_count INT,
+  sentiment_delta  NUMERIC(5,4),        <span class="comment">-- normalized -1 to +1</span>
+  sources_cited    INT,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="key">CREATE TABLE</span> cac_ltv_benchmarks (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_hash   TEXT NOT NULL,
+  niche_slug     TEXT NOT NULL,
+  pricing_model  TEXT NOT NULL,
+  estimated_cac  NUMERIC(10,2),
+  estimated_ltv  NUMERIC(10,2),
+  viability_ratio NUMERIC(6,4),         <span class="comment">-- LTV/CAC</span>
+  created_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="key">CREATE TABLE</span> failure_taxonomy (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_hash  TEXT NOT NULL,
+  niche_slug    TEXT NOT NULL,
+  kill_reason   TEXT NOT NULL,          <span class="comment">-- SATURATION | UNIT_ECON | NO_DIFFERENTIATOR | CITATION_FAIL</span>
+  saturation_score NUMERIC(4,2),
+  retry_count   INT DEFAULT 0,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);</div>
+        </div>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 1 Exit Gate</div>
+          <p>
+            <code>POST /validate</code> accepts valid input and returns a <code>session_id</code>. A test write to all four DB tables succeeds. Redis stores and retrieves a mock session object. <span class="hl-red">Do not start Sprint 2 until this gate clears.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPRINT 2 -->
+  <section class="section">
+    <div class="section-label">Sprint 2</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-02</div>
+        <div class="sprint-title">ADK Orchestrator + Agent 01: The Gatekeeper</div>
+        <div class="sprint-dur">WEEK 2–3 · Engineer 1 leads</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">Build the orchestration shell first, then slot in Agent 01.</span> The ADK orchestrator is the conductor. Build it so that adding the remaining four agents is a mechanical task, not an architectural decision.
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Initialize the ADK SessionService and Runner.</strong> Use <code>InMemorySessionService</code> for development. Switch to <code>DatabaseSessionService</code> backed by PostgreSQL before production. The Runner manages the sequential pipeline handoffs.</li>
+          <li><strong>Define the canonical inter-agent message schema.</strong> Every agent receives a <code>PipelineContext</code> object and must return an updated <code>PipelineContext</code>. Define this Pydantic model now — it is the contract every agent signs. Fields: <code>session_id</code>, <code>raw_input</code>, <code>gatekeeper_output</code>, <code>researcher_output</code>, <code>numbers_output</code>, <code>critic_decision</code>, <code>builder_output</code>, <code>pipeline_status</code>.</li>
+          <li><strong>Build Agent 01 — The Gatekeeper.</strong> Gemini prompt: takes the five raw inputs and outputs a strict JSON object: normalized niche slug, locked value proposition (≤40 words), primary audience definition, and a list of three falsifiable assumptions the validation must test. Strict JSON output only — no prose.</li>
+          <li><strong>Wire Agent 01 into the orchestrator.</strong> On <code>POST /validate</code>, the orchestrator invokes Agent 01, stores the output in Redis under <code>{session_id}:gatekeeper</code>, and triggers Agent 02. The FastAPI <code>/status</code> endpoint reads Redis and returns current pipeline stage.</li>
+        </ul>
+
+        <div class="code-block"><span class="comment"># agents/gatekeeper.py — Core structure</span>
+<span class="key">from</span> google.adk.agents <span class="key">import</span> LlmAgent
+<span class="key">from</span> google.adk.models <span class="key">import</span> Gemini
+
+GATEKEEPER_PROMPT = <span class="str">"""
+You are a precision input normalizer for a market validation system.
+Given raw user input, output ONLY a valid JSON object with these exact fields:
+
+{
+  "niche_slug": "kebab-case-niche-label-max-5-words",
+  "value_proposition": "One sentence, max 40 words, subject-verb-object format",
+  "target_audience": "Specific descriptor. No vague terms like 'businesses' or 'users'.",
+  "pricing_model": "usage_based | flat_subscription | freemium",
+  "falsifiable_assumptions": [
+    "Assumption 1 that market research must confirm or deny",
+    "Assumption 2",
+    "Assumption 3"
+  ],
+  "runway_weeks": integer,
+  "marketing_budget_usd": integer
+}
+
+Return ONLY the JSON. No preamble. No explanation. No markdown.
+"""</span>
+
+gatekeeper_agent = LlmAgent(
+  name=<span class="str">"gatekeeper"</span>,
+  model=Gemini(<span class="str">"gemini-2.0-flash"</span>),
+  instruction=GATEKEEPER_PROMPT,
+  output_key=<span class="str">"gatekeeper_output"</span>
+)</div>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 2 Exit Gate</div>
+          <p>
+            A raw user input posted to <code>/validate</code> triggers Agent 01, which returns a valid structured JSON object in under 8 seconds. The output is stored in Redis. <code>/status/{session_id}</code> returns <code>"stage": "gatekeeper_complete"</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPRINT 3 -->
+  <section class="section">
+    <div class="section-label">Sprint 3</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-03</div>
+        <div class="sprint-title">MCP Servers + Agent 02: The Researcher</div>
+        <div class="sprint-dur">WEEK 3–5 · Engineer 1 leads · Engineer 2 supports MCP</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">This is the hardest sprint. The MCP servers are custom-built and directly determine the quality of every validation.</span> The Researcher is the only agent that touches the real world. Get this wrong and the entire system produces confident garbage.
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Build MCP Server 1: Web Competitor Scraper.</strong> Uses SerpAPI to search for "<code>{niche_slug} software</code>", "<code>{niche_slug} tool</code>", "<code>best {niche_slug} alternatives</code>". Returns: list of competitor names, URLs, estimated founding year, and G2/Capterra review count if available. Cap at 20 results. Structured JSON output only.</li>
+          <li><strong>Build MCP Server 2: Reddit Sentiment Scraper.</strong> Queries Reddit API for the top 50 posts in the last 12 months matching the niche slug across r/entrepreneur, r/SaaS, r/startups, r/indiehackers. Extracts comment sentiment (positive/negative/neutral via Gemini Flash). Returns a normalized sentiment delta: +1.0 (all positive) to -1.0 (all negative).</li>
+          <li><strong>Build MCP Server 3: Product Hunt + GitHub Signal.</strong> Product Hunt API: count products launched in this niche in the last 18 months. GitHub: count public repos matching niche keywords created in last 12 months. Both are proxy signals for developer-perceived market opportunity.</li>
+          <li><strong>Build Agent 02 — The Researcher.</strong> Calls all three MCP servers in parallel (use <code>asyncio.gather</code>). Computes the Saturation Score using the weighted formula below. Every output must include the source URL that justifies it. <span class="hl-red">Unsourced claims = automatic Critic kill.</span></li>
+          <li><strong>Wire telemetry write after Agent 02 completes.</strong> Call <code>write_signal("saturation_signals", payload)</code> with the saturation score, competitor count, and sentiment delta. This is the first Data Layer write in the pipeline.</li>
+        </ul>
+
+        <div class="code-block"><span class="comment"># Saturation Score Formula (0–10)</span>
+<span class="comment"># Engineer 1 hardcodes this as a deterministic function — not AI-generated</span>
+
+<span class="key">def</span> <span class="val">compute_saturation_score</span>(
+  competitor_count: int,      <span class="comment"># from SerpAPI</span>
+  ph_launches_18mo: int,      <span class="comment"># from Product Hunt</span>
+  gh_repos_12mo: int,         <span class="comment"># from GitHub</span>
+  sentiment_delta: float      <span class="comment"># from Reddit: -1.0 to +1.0</span>
+) -> float:
+
+  <span class="comment"># Competitor density: 0–4 points</span>
+  comp_score = min(competitor_count / 10, 1.0) * 4.0
+
+  <span class="comment"># Recent market activity: 0–3 points</span>
+  activity_score = min((ph_launches_18mo + gh_repos_12mo) / 30, 1.0) * 3.0
+
+  <span class="comment"># Sentiment: negative sentiment = more saturated / frustrated market = higher score</span>
+  <span class="comment"># Positive sentiment = underserved, eager market = lower score</span>
+  sentiment_score = (1.0 - ((sentiment_delta + 1.0) / 2.0)) * 3.0
+
+  <span class="key">return</span> round(comp_score + activity_score + sentiment_score, 2)</div>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 3 Exit Gate</div>
+          <p>
+            For a test niche (e.g. "invoicing software for freelance designers"), Agent 02 returns: a competitor list with at least 5 sourced entries, a sentiment delta with cited Reddit posts, and a Saturation Score between 0–10. Total agent runtime under 30 seconds. Telemetry write to <code>saturation_signals</code> confirms in DB.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPRINT 4 -->
+  <section class="section">
+    <div class="section-label">Sprint 4</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-04</div>
+        <div class="sprint-title">Agent 03: The Numbers Engine</div>
+        <div class="sprint-dur">WEEK 5–6 · Engineer 1</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">The Numbers Engine does not browse the web. It reasons over the Researcher's output and the user's stated constraints.</span> Its output is a deterministic financial model, not an AI opinion.
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Define CAC estimation logic.</strong> Based on marketing budget and pricing model, estimate CAC using a lookup table of industry benchmarks by pricing tier (not AI-hallucinated — hardcode from known SaaS benchmarks: usage-based CAC avg $180, flat sub avg $240, freemium avg $310). The AI adjusts these by the niche sentiment delta — positive sentiment = lower CAC multiplier.</li>
+          <li><strong>Define LTV estimation logic.</strong> Based on stated pricing model and niche, estimate average MRR per customer and apply a churn rate lookup by pricing model (freemium: 8%/mo, flat: 4%/mo, usage: 5%/mo). LTV = (MRR per user) / churn rate.</li>
+          <li><strong>Compute the Viability Ratio.</strong> <code>viability_ratio = LTV / CAC</code>. Ratios below 3.0 are flagged as structurally broken. Ratios between 3.0–5.0 are marginal. Above 5.0 is viable. This output goes directly to the Critic as a binary signal.</li>
+          <li><strong>Wire telemetry write.</strong> Write <code>estimated_cac</code>, <code>estimated_ltv</code>, and <code>viability_ratio</code> to <code>cac_ltv_benchmarks</code>. This is the Data Layer's most commercially valuable signal — it is how the future benchmark product gets built.</li>
+        </ul>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 4 Exit Gate</div>
+          <p>
+            For a test case with a $500 marketing budget and flat-rate pricing, Agent 03 returns a viability ratio with explicit CAC and LTV figures and a VIABLE / MARGINAL / BROKEN classification. Telemetry write confirms in <code>cac_ltv_benchmarks</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPRINT 5 -->
+  <section class="section">
+    <div class="section-label">Sprint 5</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-05</div>
+        <div class="sprint-title">Agent 04: The Failsafe Critic</div>
+        <div class="sprint-dur">WEEK 6–7 · Engineer 1</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">The Critic is the most important agent and the simplest to build. It applies rules, not intelligence.</span> Two hard kill conditions. No exceptions. No "on the other hand." Build it as a rule engine first, then layer Gemini for the kill reason narrative.
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Kill Condition 1 — Citation Failure.</strong> Check the Researcher output: count the number of competitor entries that have a valid source URL. If more than 20% of claims are unsourced, return <code>KILL: CITATION_FAIL</code>. Do not pass to Agent 05.</li>
+          <li><strong>Kill Condition 2 — Saturation Threshold.</strong> If <code>saturation_score &gt; 8.0</code> AND no unique differentiator was identified by the Gatekeeper, return <code>KILL: SATURATION_NO_DIFFERENTIATOR</code>. Do not pass to Agent 05.</li>
+          <li><strong>Kill Condition 3 — Unit Economics.</strong> If <code>viability_ratio &lt; 3.0</code>, return <code>KILL: UNIT_ECON_BROKEN</code>. This is not a soft warning. It is a hard stop.</li>
+          <li><strong>On PASS:</strong> Gemini generates a one-paragraph "Thesis Confirmation" that summarizes why the idea cleared all three gates — with citations. This is the user's first positive signal after the pipeline runs.</li>
+          <li><strong>Telemetry write on KILL only.</strong> Write kill reason, saturation score, and session hash to <code>failure_taxonomy</code>. This is the most analytically valuable signal in the entire system — it builds the Failure Pattern Index that VCs will eventually pay for.</li>
+        </ul>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 5 Exit Gate</div>
+          <p>
+            Run three test cases: one that should kill on saturation, one on unit economics, one that should pass. All three produce the correct outcome. Kill cases write to <code>failure_taxonomy</code>. Pass case generates a Thesis Confirmation paragraph with citations.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPRINT 6 -->
+  <section class="section">
+    <div class="section-label">Sprint 6</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-06</div>
+        <div class="sprint-title">Agent 05: The Builder + Antigravity UI</div>
+        <div class="sprint-dur">WEEK 7–9 · Engineer 1 (Builder) + Frontend Engineer (Antigravity)</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">The Builder's output is a structured JSON object. Antigravity consumes that JSON and renders it. These are two separate concerns — build and test them independently.</span>
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Define the Builder output schema.</strong> The JSON must contain: <code>executive_summary</code> (3 sentences), <code>roadmap</code> (array of 90 objects, one per day, each with <code>day</code>, <code>week</code>, <code>task</code>, <code>owner</code>, <code>deliverable</code>), <code>risk_matrix</code> (top 5 risks with probability and impact scores), <code>financial_model</code> (CAC, LTV, break-even month, MRR projections at 3/6/12 months), <code>cited_sources</code> (full list from Researcher).</li>
+          <li><strong>Prompt the Builder agent.</strong> Gemini takes the full PipelineContext (all prior agent outputs) and generates the roadmap. Instruct it to populate every single day — no "continue this pattern" shortcuts. Verify day count in post-processing before storing.</li>
+          <li><strong>Build the Antigravity UI components.</strong> Four views: (1) Pipeline status tracker — shows which of the 5 agents is running in real time. (2) Kill screen — rendered when the Critic fires, showing the exact kill reason and the cited evidence. (3) Roadmap view — interactive 90-day calendar. (4) Dashboard — risk matrix, financial model, and source index.</li>
+          <li><strong>Wire the Antigravity trigger.</strong> When Agent 05 writes its output to Redis, the FastAPI gateway emits a Server-Sent Event (SSE) to the Antigravity frontend. Antigravity listens on the SSE stream and triggers the render when the event arrives.</li>
+        </ul>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 6 Exit Gate</div>
+          <p>
+            A passing idea produces a complete 90-day roadmap JSON with no missing days. Antigravity renders all four UI views without errors. A killed idea renders the Kill screen with cited evidence. End-to-end pipeline runtime: under 90 seconds.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPRINT 7 -->
+  <section class="section">
+    <div class="section-label">Sprint 7</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-07</div>
+        <div class="sprint-title">Hardening, Load Testing &amp; Production Deploy</div>
+        <div class="sprint-dur">WEEK 9–12 · Both Engineers</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">The pipeline works in a single thread. Now make it not break under 10 concurrent users.</span> This sprint is not about new features. It is about not embarrassing yourself in the first week of beta.
+        </p>
+
+        <ul class="task-list">
+          <li><strong>Add global error handling and retry logic.</strong> Every MCP server call gets 3 retries with exponential backoff. Every Gemini API call gets 2 retries. A failed agent writes its error state to Redis and exposes it via <code>/status</code>. The pipeline never silently hangs.</li>
+          <li><strong>Load test with Locust.</strong> Simulate 10 concurrent validation sessions. Target: all 10 complete within 3 minutes. Identify and fix the bottleneck — it will almost certainly be the Researcher's MCP server calls hitting external API rate limits.</li>
+          <li><strong>Implement API rate limit handling for all external services.</strong> Reddit: 60 requests/minute. Product Hunt: 60 requests/hour (cache aggressively). SerpAPI: per your plan tier. GitHub: 5000 requests/hour (authenticated). Add per-service rate limit tracking in Redis.</li>
+          <li><strong>Deploy to Google Cloud Run.</strong> Two services: <code>api-service</code> (FastAPI) and <code>agent-worker</code> (ADK pipeline). Cloud Run auto-scales. Set minimum instances to 1 to avoid cold starts on the agent worker. Antigravity deploys separately per its own deployment model.</li>
+          <li><strong>Set up basic monitoring.</strong> Cloud Monitoring for API latency and error rates. Postgres slow query log for any Data Layer write taking over 200ms. Alert on pipeline failure rate above 5% (excluding intentional Critic kills).</li>
+        </ul>
+
+        <div class="gate">
+          <div class="gate-label">Phase 1 Final Exit Gate</div>
+          <p>
+            10 concurrent validations complete without errors. All four DB tables are accumulating signal data. The Antigravity UI renders correctly on completion. Pipeline failure rate (excluding Critic kills) is under 2%. <span class="hl-acid">This is Phase 1 complete.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section class="section">
+    <div class="section-label">Phase 1 Deliverables Checklist</div>
+    <table class="del-table">
+      <thead>
+        <tr>
+          <th>Deliverable</th>
+          <th>Owner</th>
+          <th>Week Due</th>
+          <th>Exit Criteria</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PostgreSQL schema + Telemetry Writer</td>
+          <td class="owner">Eng 2</td>
+          <td>W2</td>
+          <td>All 4 tables writable, non-blocking async confirmed</td>
+        </tr>
+        <tr>
+          <td>FastAPI Gateway + Redis session store</td>
+          <td class="owner">Eng 2</td>
+          <td>W2</td>
+          <td>POST /validate returns session_id in &lt;200ms</td>
+        </tr>
+        <tr>
+          <td>ADK Orchestrator + PipelineContext schema</td>
+          <td class="owner">Eng 1</td>
+          <td>W3</td>
+          <td>Sequential handoff between stub agents works</td>
+        </tr>
+        <tr>
+          <td>Agent 01 — Gatekeeper</td>
+          <td class="owner">Eng 1</td>
+          <td>W3</td>
+          <td>Valid JSON output in &lt;8s for any raw input</td>
+        </tr>
+        <tr>
+          <td>MCP Servers (×3)</td>
+          <td class="owner">Eng 1+2</td>
+          <td>W5</td>
+          <td>All three return sourced, structured data</td>
+        </tr>
+        <tr>
+          <td>Agent 02 — Researcher + Saturation Score</td>
+          <td class="owner">Eng 1</td>
+          <td>W5</td>
+          <td>Score computed deterministically; telemetry write confirmed</td>
+        </tr>
+        <tr>
+          <td>Agent 03 — Numbers Engine</td>
+          <td class="owner">Eng 1</td>
+          <td>W6</td>
+          <td>Viability ratio output; telemetry write confirmed</td>
+        </tr>
+        <tr>
+          <td>Agent 04 — Failsafe Critic</td>
+          <td class="owner">Eng 1</td>
+          <td>W7</td>
+          <td>3 kill conditions enforced; failure taxonomy write confirmed</td>
+        </tr>
+        <tr>
+          <td>Agent 05 — Builder (90-day roadmap)</td>
+          <td class="owner">Eng 1</td>
+          <td>W8</td>
+          <td>Complete JSON roadmap with no missing days</td>
+        </tr>
+        <tr>
+          <td>Antigravity UI (4 views)</td>
+          <td class="owner">FE Eng</td>
+          <td>W9</td>
+          <td>All views render; SSE trigger works; kill screen functional</td>
+        </tr>
+        <tr>
+          <td>Load test + production deploy</td>
+          <td class="owner">Both</td>
+          <td>W12</td>
+          <td>10 concurrent sessions; error rate &lt;2%; Cloud Run live</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SUCCESS CRITERIA -->
+  <section class="section">
+    <div class="section-label">Phase 1 Success Metrics</div>
+    <div class="criteria-grid">
+      <div class="criteria-card">
+        <div class="criteria-num">&lt;90s</div>
+        <div class="criteria-label">End-to-End Pipeline Runtime</div>
+      </div>
+      <div class="criteria-card">
+        <div class="criteria-num">10</div>
+        <div class="criteria-label">Concurrent Sessions Without Error</div>
+      </div>
+      <div class="criteria-card">
+        <div class="criteria-num">&lt;2%</div>
+        <div class="criteria-label">Pipeline Failure Rate (Non-Critic)</div>
+      </div>
+      <div class="criteria-card">
+        <div class="criteria-num">4</div>
+        <div class="criteria-label">DB Tables Accumulating Signal Data</div>
+      </div>
+      <div class="criteria-card">
+        <div class="criteria-num">90</div>
+        <div class="criteria-label">Roadmap Days — Zero Missing</div>
+      </div>
+      <div class="criteria-card">
+        <div class="criteria-num">100%</div>
+        <div class="criteria-label">Critic Kill Reasons Cited to Source</div>
+      </div>
+    </div>
+  </section>
+
+  <hr/>
+
+  <footer class="footer">
+    <span>AI DUE DILIGENCE LAYER — PHASE 1 PRD</span>
+    <span>v1.0 · Built from Agent Spec v2.1</span>
+    <span>ENGINEER-READY · CONFIDENTIAL</span>
+  </footer>
+
+</div>
+</body>
+</html>
