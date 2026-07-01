@@ -334,6 +334,8 @@ document.addEventListener("DOMContentLoaded", () => {
             setStepState(stepCrit, "complete", "Passed");
             setStepState(stepBuild, "active", "Building");
         }
+    }
+
     function setStepState(element, className, text) {
         element.className = `step-card ${className}`;
         element.querySelector(".badge").innerText = text;
