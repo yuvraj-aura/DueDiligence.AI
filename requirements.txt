@@ -231,3 +231,9 @@ websockets==15.0.1
     #   google-genai
 zipp==4.1.0
     # via importlib-metadata
+apscheduler==3.11.3
+    # via manually added
+sendgrid==6.12.5
+    # via manually added
+
+

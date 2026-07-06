@@ -20,7 +20,15 @@ from google.genai import types
 async def lifespan(app: FastAPI):
     # Proactively initialize cache in the background during app startup
     asyncio.create_task(cache.initialize())
+    
+    # Start daily cron job scheduler
+    from services.daily_cron import start_scheduler
+    app.state.scheduler = start_scheduler()
+    
     yield
+    
+    # Shutdown scheduler
+    app.state.scheduler.shutdown()
 
 app = FastAPI(title="AI Due Diligence Gateway API", lifespan=lifespan)
 cache = SessionCache()
@@ -164,6 +172,10 @@ async def stream_status(session_id: str):
             retries = 0  # reset retries since session is active
             
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+# Register workspace router
+from api.routes.workspace import router as workspace_router
+app.include_router(workspace_router)
 
 # Mount frontend client UI directory
 app.mount("/ui", StaticFiles(directory="ui", html=True), name="ui")

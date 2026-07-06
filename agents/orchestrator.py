@@ -16,14 +16,14 @@ session_service = InMemorySessionService()
 cache = SessionCache()
 
 @retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=1, max=4),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=2, min=2, max=10),
     reraise=True
 )
 async def run_agent_with_retry(runner, user_id, session_id, message):
     """
-    Enforces exactly 2 retries (3 total attempts) with exponential backoff
-    on all ADK agent run loops to catch and recover from API timeouts.
+    Enforces up to 5 attempts with exponential backoff
+    on all ADK agent run loops to catch and recover from transient API errors.
     """
     async for event in runner.run_async(
         user_id=user_id,
@@ -385,3 +385,11 @@ async def run_pipeline(session_id: str, session_hash: str, inputs: dict):
     session_data["status"] = context.pipeline_status
     session_data["context"] = context.dict()
     await cache.set_session(session_id, session_data)
+
+    if context.pipeline_status == "builder_complete":
+        try:
+            from data_layer.roadmap_persistence import persist_roadmap
+            thesis_text = inputs.get("thesis", "")
+            await persist_roadmap(session_id, thesis_text, context.builder_output)
+        except Exception as e:
+            logger.error(f"Orchestrator: Failed to persist roadmap to SQLite for session {session_id}: {e}")

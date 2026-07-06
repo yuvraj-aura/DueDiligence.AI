@@ -628,9 +628,9 @@ document.addEventListener("DOMContentLoaded", () => {
             sourcesContainer.appendChild(li);
         });
 
-        // Setup Roadmap Weeks selector
-        cachedRoadmap = builderOut.roadmap || [];
-        setupRoadmapWeekSelectors();
+        // Setup Roadmap Weeks selector (Sprint 1.4: Living Execution Workspace)
+        const sessionId = document.getElementById("active-session-id").innerText;
+        loadWorkspace(sessionId);
     }
 
     // Setup Roadmap Weeks selectors (1-13)
@@ -791,4 +791,212 @@ document.addEventListener("DOMContentLoaded", () => {
         resetTrackerSteps();
         switchView(formView);
     });
+
+    // Living Execution Workspace loader (Sprint 1.4)
+    async function loadWorkspace(sessionId) {
+        try {
+            const res = await fetch(`${API_BASE}/workspace/${sessionId}`);
+            if (!res.ok) throw new Error("Failed to load workspace data.");
+            const data = await res.json();
+            
+            const kanbanBoard = document.getElementById("workspace-kanban-board");
+            kanbanBoard.innerHTML = "";
+            
+            const weeks = data.weeks || {};
+            const currentDay = data.current_day || 1;
+            const sessionStatus = data.status;
+            
+            // Render 13 Weeks columns
+            for (let w = 1; w <= 13; w++) {
+                const weekTasks = weeks[w] || [];
+                const completedCount = weekTasks.filter(t => t.status === "complete").length;
+                const totalCount = weekTasks.length;
+                
+                const column = document.createElement("div");
+                column.className = "kanban-column";
+                column.id = `kanban-week-${w}`;
+                
+                // Highlight current week
+                const isCurrentWeek = currentDay > (w-1)*7 && currentDay <= w*7;
+                const currentWeekBadge = isCurrentWeek ? ' <span style="background: #c6ff00; color: #000; font-size: 0.7rem; font-weight: bold; margin-left: 5px; padding: 2px 5px; border-radius: 4px;">CURRENT</span>' : '';
+                
+                column.innerHTML = `
+                    <h4>Week ${w} ${currentWeekBadge} <span id="week-counter-${w}" style="font-size: 0.8rem; background: rgba(255, 255, 255, 0.05); padding: 2px 8px; border-radius: 10px; color: var(--text-secondary);">${completedCount}/${totalCount}</span></h4>
+                    <div class="kanban-tasks" id="tasks-week-${w}" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                `;
+                
+                kanbanBoard.appendChild(column);
+                
+                const tasksContainer = column.querySelector(`#tasks-week-${w}`);
+                weekTasks.forEach(task => {
+                    const card = document.createElement("div");
+                    card.className = `task-card ${task.status === 'complete' ? 'complete' : ''}`;
+                    card.id = `task-${task.id}`;
+                    
+                    card.innerHTML = `
+                        <div class="task-card-header">
+                            <input type="checkbox" id="chk-${task.id}" data-task-id="${task.id}" ${task.status === 'complete' ? 'checked' : ''}>
+                            <span class="task-day-label">Day ${task.day_number}</span>
+                        </div>
+                        <p class="task-title">${task.task_title}</p>
+                        <div class="task-card-footer">
+                            <span class="task-owner-badge">${task.owner}</span>
+                        </div>
+                        ${task.deliverable ? `<div class="task-deliverable"><strong>Deliverable:</strong> ${task.deliverable}</div>` : ''}
+                    `;
+                    
+                    tasksContainer.appendChild(card);
+                    
+                    // Wire checkbox handler with Optimistic UI updates
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    checkbox.addEventListener("change", async () => {
+                        const checked = checkbox.checked;
+                        if (checked) {
+                            card.classList.add("complete");
+                        } else {
+                            card.classList.remove("complete");
+                        }
+                        
+                        try {
+                            const patchRes = await fetch(`${API_BASE}/workspace/tasks/${task.id}`, {
+                                method: "PATCH",
+                                headers: {"Content-Type": "application/json"},
+                                body: JSON.stringify({ status: checked ? "complete" : "pending" })
+                            });
+                            if (!patchRes.ok) throw new Error();
+                            const patchData = await patchRes.json();
+                            
+                            // Update task count in column header
+                            task.status = checked ? "complete" : "pending";
+                            const newCompletedCount = weekTasks.filter(t => t.status === "complete").length;
+                            document.getElementById(`week-counter-${w}`).innerText = `${newCompletedCount}/${totalCount}`;
+                            
+                            // Update progress metrics
+                            updateWorkspaceProgress(patchData.progress_metrics, currentDay, weeks);
+                        } catch (err) {
+                            console.error(err);
+                            // Rollback
+                            checkbox.checked = !checked;
+                            if (!checked) {
+                                card.classList.add("complete");
+                            } else {
+                                card.classList.remove("complete");
+                            }
+                            alert("Failed to sync task status. Rolled back.");
+                        }
+                    });
+                });
+                
+                // View 4: Milestone Markers for Week 4, Week 8, and Week 12
+                if (w === 4) {
+                    const milestone = document.createElement("div");
+                    milestone.className = "milestone-card";
+                    milestone.innerHTML = `
+                        <div class="milestone-header">🏆 Milestone</div>
+                        <div class="milestone-text">By end of Week 4, you should have finalized prototype architecture and validated pricing/value propositions with 10 real prospects.</div>
+                    `;
+                    column.appendChild(milestone);
+                } else if (w === 8) {
+                    const milestone = document.createElement("div");
+                    milestone.className = "milestone-card";
+                    milestone.innerHTML = `
+                        <div class="milestone-header">🏆 Milestone</div>
+                        <div class="milestone-text">By end of Week 8, you should have completed private beta testing, resolved usability reviews, and secured flat-rate pre-sales.</div>
+                    `;
+                    column.appendChild(milestone);
+                } else if (w === 12) {
+                    const milestone = document.createElement("div");
+                    milestone.className = "milestone-card";
+                    milestone.innerHTML = `
+                        <div class="milestone-header">🏆 Milestone</div>
+                        <div class="milestone-text">By end of Week 12, you should have launched public marketing campaigns, stabilized server scaling, and cleared the MRR checkin threshold.</div>
+                    `;
+                    column.appendChild(milestone);
+                }
+            }
+            
+            // Set up progress, slippage, and pause controls
+            updateWorkspaceProgress(data.progress_metrics, currentDay, weeks);
+            setupPauseControl(sessionId, sessionStatus);
+            
+        } catch (err) {
+            console.error("Workspace Load Error:", err);
+            alert("Could not load the Living Execution Workspace from SQLite.");
+        }
+    }
+
+    function updateWorkspaceProgress(progressMetrics, currentDay, weeks) {
+        const pct = progressMetrics.completion_pct || 0.0;
+        document.getElementById("workspace-completion-pct").innerText = `${Math.round(pct)}%`;
+        
+        // Hexagon Fill Path Perimeter Calculation (stroke-dasharray: 277)
+        const fillPath = document.getElementById("hexagon-progress");
+        if (fillPath) {
+            const maxOffset = 277;
+            const offset = maxOffset - (maxOffset * (pct / 100));
+            fillPath.style.strokeDashoffset = offset;
+        }
+        
+        // Calculate open tasks from earlier weeks
+        const currentWeek = Math.floor((currentDay - 1) / 7) + 1;
+        let openEarlierCount = 0;
+        for (let w = 1; w < currentWeek; w++) {
+            const weekTasks = weeks[w] || [];
+            openEarlierCount += weekTasks.filter(t => t.status !== "complete").length;
+        }
+        
+        // Render Slippage Warning Banner
+        const slippageBanner = document.getElementById("slippage-banner");
+        if (progressMetrics.slippage_days > 2) {
+            document.getElementById("slippage-banner-message").innerText = 
+                `You're ${progressMetrics.slippage_days} days behind schedule. ${openEarlierCount} tasks from earlier weeks are still open.`;
+            slippageBanner.style.display = "flex";
+            
+            // Jump to oldest open task viewport auto-scroll action
+            document.getElementById("jump-to-oldest-task-btn").onclick = () => {
+                let targetWeek = 1;
+                for (let w = 1; w <= 13; w++) {
+                    const wTasks = weeks[w] || [];
+                    if (wTasks.some(t => t.status !== "complete")) {
+                        targetWeek = w;
+                        break;
+                    }
+                }
+                const targetColumn = document.getElementById(`kanban-week-${targetWeek}`);
+                if (targetColumn) {
+                    targetColumn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                }
+            };
+        } else {
+            slippageBanner.style.display = "none";
+        }
+    }
+
+    function setupPauseControl(sessionId, currentStatus) {
+        const pauseBtn = document.getElementById("workspace-pause-btn");
+        
+        if (currentStatus === "paused") {
+            pauseBtn.innerText = "Roadmap Paused";
+            pauseBtn.classList.add("paused");
+        } else {
+            pauseBtn.innerText = "Pause Roadmap";
+            pauseBtn.classList.remove("paused");
+        }
+        
+        pauseBtn.onclick = async () => {
+            if (pauseBtn.classList.contains("paused")) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/workspace/${sessionId}/pause`, {
+                    method: "PATCH"
+                });
+                if (!res.ok) throw new Error();
+                pauseBtn.innerText = "Roadmap Paused";
+                pauseBtn.classList.add("paused");
+            } catch (err) {
+                console.error(err);
+                alert("Failed to pause validation roadmap.");
+            }
+        };
+    }
 });

@@ -394,17 +394,39 @@
                         </div>
                     </div>
 
-                    <!-- Sub-view 2: 90-Day Roadmap -->
+                    <!-- Sub-view 2: 90-Day Roadmap (Sprint 1.4: Living Execution Workspace) -->
                     <div id="tab-roadmap" class="tab-pane">
-                        <div class="roadmap-header">
-                            <h3>90-Day Action Calendar</h3>
-                            <p>Select a week below to view your daily tasks, assigned owner, and key deliverables.</p>
-                            <div class="week-selector" id="week-selector-buttons">
-                                <!-- Generated -->
+                        <!-- Slippage Banner (View 3) -->
+                        <div id="slippage-banner" class="slippage-banner" style="display: none;">
+                            <div class="banner-text">
+                                ⚠️ <span id="slippage-banner-message">You're 0 days behind schedule. 0 tasks from earlier weeks are still open.</span>
                             </div>
+                            <button class="btn btn-secondary" id="jump-to-oldest-task-btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                Jump to oldest open task
+                            </button>
                         </div>
-                        <div class="roadmap-tasks-list" id="week-tasks-container">
-                            <!-- Selected week tasks show here -->
+
+                        <!-- Workspace Header with Hexagon Progress Ring (View 2) -->
+                        <div class="workspace-header">
+                            <div class="hexagon-container">
+                                <svg class="hexagon-svg" viewBox="0 0 100 100">
+                                    <path class="hexagon-bg" d="M 50,5 L 90,28 L 90,72 L 50,95 L 10,72 L 10,28 Z"></path>
+                                    <path class="hexagon-fill" id="hexagon-progress" d="M 50,5 L 90,28 L 90,72 L 50,95 L 10,72 L 10,28 Z"></path>
+                                </svg>
+                                <div class="hexagon-text" id="workspace-completion-pct">0%</div>
+                            </div>
+                            <div class="workspace-info" style="flex-grow: 1;">
+                                <h4 style="margin: 0; color: var(--text-primary); font-size: 1.2rem;">Living Execution Workspace</h4>
+                                <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">
+                                    Track daily milestones and tasks. Synchronized live with our SQLite database layer.
+                                </p>
+                            </div>
+                            <button class="btn btn-pause" id="workspace-pause-btn">Pause Roadmap</button>
+                        </div>
+
+                        <!-- Weekly Kanban Board (View 1) -->
+                        <div class="kanban-board" id="workspace-kanban-board">
+                            <!-- Dynamically generated 13 Weeks columns go here -->
                         </div>
                     </div>
 

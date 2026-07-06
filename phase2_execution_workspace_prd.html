@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PRD — Living Execution Workspace</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --black:       #0A0A0B;
+    --surface:     #111114;
+    --panel:       #18181C;
+    --border:      #27272D;
+    --border-soft: #1F1F24;
+    --acid:        #C6FF00;
+    --acid-dim:    #8FB500;
+    --acid-bg:     #0D1A00;
+    --red:         #FF3B3B;
+    --red-bg:      #1A0000;
+    --amber:       #FFAA00;
+    --amber-bg:    #1A1400;
+    --cyan:        #00D4D4;
+    --cyan-bg:     #001A1A;
+    --text-primary:   #F0F0F2;
+    --text-secondary: #8A8A94;
+    --text-muted:     #4A4A54;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--black);color:var(--text-primary);font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;}
+  .page{max-width:1020px;margin:0 auto;padding:60px 32px 120px;}
+
+  .header{border-bottom:1px solid var(--border);padding-bottom:44px;margin-bottom:60px;}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--acid);text-transform:uppercase;margin-bottom:18px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(26px,4.5vw,44px);font-weight:700;line-height:1.08;letter-spacing:-0.03em;margin-bottom:6px;}
+  h1 span{color:var(--acid);}
+  .header-sub{font-size:14px;color:var(--text-secondary);font-weight:300;margin-top:14px;max-width:680px;line-height:1.7;}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
+  .badge{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;padding:4px 10px;border-radius:2px;text-transform:uppercase;}
+  .badge-acid{border:1px solid var(--acid-dim);color:var(--acid);}
+  .badge-amber{border:1px solid #665000;color:var(--amber);background:var(--amber-bg);}
+  .badge-cyan{border:1px solid #004444;color:var(--cyan);background:var(--cyan-bg);}
+  .badge-red{border:1px solid #500000;color:var(--red);background:var(--red-bg);}
+
+  .section{margin-bottom:56px;}
+  .section-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:22px 26px;margin-bottom:10px;}
+  .card-title{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--acid);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+  .card p{color:var(--text-secondary);font-size:13.5px;line-height:1.75;}
+
+  .important{background:var(--acid-bg);border:1px solid var(--acid-dim);border-left:3px solid var(--acid);border-radius:6px;padding:18px 22px;margin:14px 0;}
+  .important-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--acid);text-transform:uppercase;margin-bottom:6px;}
+  .important p{color:#A8C870;font-size:13.5px;line-height:1.7;}
+
+  .sprint{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+  .sprint-header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:16px 22px;background:var(--panel);border-bottom:1px solid var(--border);}
+  .sprint-num{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;color:var(--text-muted);}
+  .sprint-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--text-primary);}
+  .sprint-dur{font-family:'Space Mono',monospace;font-size:10px;color:var(--acid);letter-spacing:0.1em;white-space:nowrap;}
+  .sprint-body{padding:22px;}
+  .sprint-body p{color:var(--text-secondary);font-size:13.5px;line-height:1.75;margin-bottom:16px;}
+
+  .task-list{list-style:none;}
+  .task-list li{display:grid;grid-template-columns:18px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;color:var(--text-secondary);align-items:start;}
+  .task-list li:last-child{border-bottom:none;}
+  .task-list li::before{content:'›';color:var(--acid);font-weight:700;font-size:15px;line-height:1.4;}
+  .task-list li strong{color:var(--text-primary);}
+
+  .code-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid-dim);border-radius:4px;padding:16px 20px;margin:14px 0;font-family:'Space Mono',monospace;font-size:12px;color:#B0CC70;line-height:1.7;overflow-x:auto;white-space:pre;}
+  .code-block .comment{color:var(--text-muted);}
+  .code-block .key{color:var(--acid);}
+  .code-block .val{color:var(--cyan);}
+  .code-block .str{color:#FFB060;}
+
+  .schema{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px 24px;margin-bottom:12px;}
+  .schema-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--cyan);margin-bottom:10px;}
+
+  .gate{background:var(--red-bg);border:1px solid #500000;border-left:3px solid var(--red);border-radius:6px;padding:18px 22px;margin:14px 0;}
+  .gate-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--red);text-transform:uppercase;margin-bottom:6px;}
+  .gate p{color:#CC8888;font-size:13.5px;line-height:1.7;}
+
+  .del-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .del-table th{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);padding:10px 16px;text-align:left;border-bottom:1px solid var(--border);background:var(--panel);}
+  .del-table td{padding:11px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-secondary);vertical-align:top;}
+  .del-table tr:last-child td{border-bottom:none;}
+  .del-table td:first-child{color:var(--text-primary);font-weight:500;font-size:13px;}
+  .del-table .owner{font-family:'Space Mono',monospace;font-size:11px;color:var(--acid);}
+
+  .arch-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:28px;}
+  .arch-row{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:8px;}
+  .arch-node{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px 16px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--text-primary);text-align:center;min-width:120px;}
+  .arch-node.acid{border-color:var(--acid-dim);color:var(--acid);background:var(--acid-bg);}
+  .arch-node.cyan{border-color:#004444;color:var(--cyan);background:var(--cyan-bg);}
+  .arch-node.amber{border-color:#554400;color:var(--amber);background:var(--amber-bg);}
+  .arch-node small{display:block;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;font-weight:400;opacity:0.7;margin-top:2px;}
+  .arch-arrow{font-size:16px;color:var(--text-muted);padding:0 8px;flex-shrink:0;}
+  .arch-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin:12px 0 6px;}
+  .arch-divider{border:none;border-top:1px dashed var(--border);margin:16px 0;}
+
+  .env-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;}
+  .env-card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:18px 20px;}
+  .env-card-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;}
+  .env-card ul{list-style:none;}
+  .env-card ul li{font-size:12.5px;color:var(--text-secondary);padding:4px 0;border-bottom:1px solid var(--border-soft);font-family:'Space Mono',monospace;}
+  .env-card ul li:last-child{border-bottom:none;}
+
+  .criteria-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+  .criteria-card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:16px 18px;text-align:center;}
+  .criteria-num{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:var(--acid);letter-spacing:-0.04em;line-height:1;}
+  .criteria-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin-top:6px;line-height:1.5;}
+
+  .hl{color:var(--text-primary);font-weight:500;}
+  .hl-acid{color:var(--acid);}
+  .hl-red{color:var(--red);}
+
+  hr{border:none;border-top:1px solid var(--border);margin:52px 0;}
+  .footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:64px;padding-top:24px;border-top:1px solid var(--border);}
+  .footer span{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--text-muted);}
+
+  @media(max-width:600px){.page{padding:32px 16px 80px;}.sprint-header{grid-template-columns:1fr auto;}.sprint-num{display:none;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="eyebrow">Product Requirements Document · Phase 2 · Sprint 1</div>
+    <h1>Build Blueprint:<br/><span>The Living Execution Workspace</span></h1>
+    <p class="header-sub">
+      Converts the Builder agent's static 90-day roadmap from a wall of text into an interactive, trackable execution surface — checkboxes, progress state, milestone markers, and weekly check-ins. This is the single highest-leverage retention mechanic in the product. It is the reason a founder opens the app on Day 47 instead of never coming back after Day 1.
+    </p>
+    <div class="badge-row">
+      <span class="badge badge-acid">Phase 2 · Sprint 1</span>
+      <span class="badge badge-amber">Target: 4 Weeks</span>
+      <span class="badge badge-cyan">Stack: FastAPI · PostgreSQL · React (Antigravity) · Redis</span>
+      <span class="badge badge-red">Depends On: Phase 1 Builder Agent Output Schema</span>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="section-label">North Star</div>
+    <div class="card">
+      <div class="card-title">Definition of Done</div>
+      <p>
+        A founder who passed validation opens their roadmap and sees 90 individual, checkable tasks organized by week. They can mark a task complete, see their progress percentage update in real time, receive a prompt to check in weekly, and see the system flag when they've fallen behind schedule. <span class="hl">The roadmap is no longer a document. It is a workspace the founder returns to daily.</span> That daily return is Sprint 1 complete — nothing else in this sprint matters if that loop doesn't work.
+      </p>
+    </div>
+    <div class="important">
+      <div class="important-label">Rule Zero</div>
+      <p>
+        Do not rebuild the Builder agent's output logic. The 90-day roadmap generation already works. This sprint wraps a persistence and interaction layer <strong>around</strong> that existing output — it does not touch Agent 05's prompt or generation logic. If an engineer proposes changing how the roadmap is generated, that is scope creep. Reject it.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">System Architecture — What Gets Built</div>
+    <div class="arch-box">
+      <div class="arch-label">Existing (Do Not Rebuild)</div>
+      <div class="arch-row">
+        <div class="arch-node">Agent 05<small>Builder — 90-day JSON</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">Redis<small>{session_id}:builder_output</small></div>
+      </div>
+
+      <hr class="arch-divider"/>
+      <div class="arch-label">New — Sprint 1 Scope</div>
+      <div class="arch-row">
+        <div class="arch-node acid">Roadmap Persistence Service<small>Writes to PostgreSQL</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">roadmap_tasks table<small>90 rows per session</small></div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-node cyan">Task State API<small>PATCH /tasks/{id}/complete</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node cyan">Progress Calculator<small>% complete, streak, slippage</small></div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-node amber">Weekly Check-in Scheduler<small>Cron / Cloud Scheduler</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node amber">Email/Push Notification<small>SendGrid or FCM</small></div>
+      </div>
+
+      <hr class="arch-divider"/>
+      <div class="arch-label">Frontend (Antigravity)</div>
+      <div class="arch-row">
+        <div class="arch-node acid">Workspace Dashboard<small>Weekly kanban view</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">Progress Ring<small>% complete visual</small></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node acid">Slippage Banner<small>"You're 4 days behind"</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Step 0 — Environment &amp; Dependencies (Day 1)</div>
+    <div class="env-grid">
+      <div class="env-card">
+        <div class="env-card-label">New Python Packages</div>
+        <ul>
+          <li>apscheduler (or Cloud Scheduler)</li>
+          <li>sendgrid</li>
+          <li>firebase-admin (push, optional)</li>
+          <li>pydantic v2 (existing)</li>
+        </ul>
+      </div>
+      <div class="env-card">
+        <div class="env-card-label">New API Keys</div>
+        <ul>
+          <li>SendGrid API key</li>
+          <li>FCM server key (if push)</li>
+        </ul>
+      </div>
+      <div class="env-card">
+        <div class="env-card-label">Infra Additions</div>
+        <ul>
+          <li>New Postgres tables (below)</li>
+          <li>Cloud Scheduler job (weekly)</li>
+          <li>No new services — extends existing FastAPI app</li>
+        </ul>
+      </div>
+      <div class="env-card">
+        <div class="env-card-label">Repo Additions</div>
+        <ul>
+          <li>/api/routes/workspace.py</li>
+          <li>/data_layer/roadmap_persistence.py</li>
+          <li>/services/progress_calculator.py</li>
+          <li>/services/checkin_scheduler.py</li>
+          <li>/ui/workspace (Antigravity components)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Sprint 1.1</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-1.1</div>
+        <div class="sprint-title">Roadmap Persistence Layer</div>
+        <div class="sprint-dur">WEEK 1 · Engineer 2 leads</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">The Builder's 90-day JSON currently lives in Redis with a 24-hour TTL and disappears.</span> Before anything else, that output needs to become permanent, queryable, per-task state in Postgres. This is the foundation every other piece of this sprint depends on.
+        </p>
+        <ul class="task-list">
+          <li><strong>Design and migrate the schema.</strong> Two new tables: <code>roadmap_sessions</code> (one row per validated idea) and <code>roadmap_tasks</code> (one row per day/task — 90 rows per session). See schema below.</li>
+          <li><strong>Build the ingestion function.</strong> <code>persist_roadmap(session_id, builder_output_json)</code> — runs once, immediately after Agent 05 completes. Parses the 90-day array and inserts 90 rows into <code>roadmap_tasks</code>, each defaulting to <code>status: pending</code>.</li>
+          <li><strong>Wire this into the existing pipeline.</strong> In the orchestrator, immediately after the Builder agent returns its output and before the SSE event fires to the frontend, call <code>persist_roadmap()</code>. This must complete before the "pipeline complete" event is sent — the frontend should load the workspace from Postgres, not from the raw Builder JSON.</li>
+          <li><strong>Do not delete the Redis cache.</strong> Keep it as a fallback for the initial render while the Postgres write confirms. Belt and suspenders — this pipeline has already broken once on a rushed change.</li>
+        </ul>
+
+        <div class="schema">
+          <div class="schema-title">// data_layer/schema_additions.sql</div>
+          <div class="code-block"><span class="key">CREATE TABLE</span> roadmap_sessions (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id        UUID NOT NULL REFERENCES validation_sessions(id),
+  user_id           UUID,                    <span class="comment">-- nullable until auth exists</span>
+  thesis_summary    TEXT NOT NULL,
+  total_days        INT NOT NULL DEFAULT 90,
+  started_at        TIMESTAMPTZ DEFAULT NOW(),
+  current_day       INT DEFAULT 1,           <span class="comment">-- calendar day, not task index</span>
+  completion_pct    NUMERIC(5,2) DEFAULT 0,
+  last_checkin_at   TIMESTAMPTZ,
+  status            TEXT DEFAULT 'active'    <span class="comment">-- active | paused | completed | abandoned</span>
+);
+
+<span class="key">CREATE TABLE</span> roadmap_tasks (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  roadmap_session_id UUID NOT NULL REFERENCES roadmap_sessions(id),
+  day_number        INT NOT NULL,            <span class="comment">-- 1 to 90</span>
+  week_number       INT NOT NULL,            <span class="comment">-- 1 to 13</span>
+  task_title        TEXT NOT NULL,
+  task_description  TEXT,
+  owner             TEXT,                    <span class="comment">-- from Builder output</span>
+  deliverable       TEXT,
+  status            TEXT DEFAULT 'pending',  <span class="comment">-- pending | complete | skipped</span>
+  completed_at      TIMESTAMPTZ,
+  UNIQUE(roadmap_session_id, day_number)
+);
+
+<span class="key">CREATE INDEX</span> idx_roadmap_tasks_session <span class="key">ON</span> roadmap_tasks(roadmap_session_id);</div>
+        </div>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 1.1 Exit Gate</div>
+          <p>
+            Running a test validation through the full pipeline results in exactly 90 rows in <code>roadmap_tasks</code>, correctly grouped by week, with the correct owner and deliverable fields populated from the Builder's JSON. Zero missing days. Zero duplicate day numbers.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Sprint 1.2</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-1.2</div>
+        <div class="sprint-title">Task State API + Progress Calculator</div>
+        <div class="sprint-dur">WEEK 2 · Engineer 2 leads</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">This is the interaction layer.</span> Everything a founder does inside the workspace — checking a box, viewing progress — routes through this API.
+        </p>
+        <ul class="task-list">
+          <li><strong>Build <code>GET /workspace/{roadmap_session_id}</code>.</strong> Returns all 90 tasks grouped by week, plus the parent session's completion percentage and current day. This is what the frontend loads on page open.</li>
+          <li><strong>Build <code>PATCH /workspace/tasks/{task_id}</code>.</strong> Accepts <code>{"status": "complete"}</code> or <code>{"status": "skipped"}</code>. Updates the row, sets <code>completed_at</code>, and triggers a recalculation of the parent session's <code>completion_pct</code>.</li>
+          <li><strong>Build the Progress Calculator service.</strong> A pure function: <code>calculate_progress(roadmap_session_id)</code> — counts complete/total tasks, computes percentage, and computes a <strong>slippage score</strong>: compare <code>current_day</code> (calendar days since <code>started_at</code>) against the day number of the last completed task. If the founder is on calendar Day 20 but has only completed tasks through Day 12, slippage = 8 days behind. This number drives the UI's slippage banner.</li>
+          <li><strong>Write the daily cron job that advances <code>current_day</code>.</strong> A scheduled job (APScheduler or Cloud Scheduler) runs once daily, incrementing <code>current_day</code> for every active roadmap session. This must be a separate, deterministic process — do not calculate "current day" on the fly from timestamps in the API layer, or every timezone edge case becomes a support ticket.</li>
+        </ul>
+
+        <div class="code-block"><span class="comment"># services/progress_calculator.py — core logic</span>
+
+<span class="key">def</span> <span class="val">calculate_progress</span>(roadmap_session_id: str) -> dict:
+    tasks = fetch_tasks(roadmap_session_id)
+    total = len(tasks)
+    completed = len([t <span class="key">for</span> t <span class="key">in</span> tasks <span class="key">if</span> t.status == <span class="str">"complete"</span>])
+
+    completion_pct = round((completed / total) * 100, 2)
+
+    <span class="comment"># Slippage: last completed day number vs calendar day elapsed</span>
+    last_completed_day = max(
+        [t.day_number <span class="key">for</span> t <span class="key">in</span> tasks <span class="key">if</span> t.status == <span class="str">"complete"</span>],
+        default=0
+    )
+    session = fetch_session(roadmap_session_id)
+    calendar_days_elapsed = (now() - session.started_at).days + 1
+
+    slippage_days = calendar_days_elapsed - last_completed_day
+
+    <span class="key">return</span> {
+        <span class="str">"completion_pct"</span>: completion_pct,
+        <span class="str">"completed_tasks"</span>: completed,
+        <span class="str">"total_tasks"</span>: total,
+        <span class="str">"slippage_days"</span>: max(slippage_days, 0),
+        <span class="str">"on_track"</span>: slippage_days <= 2
+    }</div>
+
+        <div class="gate">
+          <div class="gate-label">Sprint 1.2 Exit Gate</div>
+          <p>
+            PATCH a task to complete, then GET the workspace — completion percentage updates correctly. Manually backdate a session's <code>started_at</code> in a test row to simulate being behind schedule; slippage_days reflects the correct gap.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Sprint 1.3</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-1.3</div>
+        <div class="sprint-title">Weekly Check-in Scheduler</div>
+        <div class="sprint-dur">WEEK 3 · Engineer 2</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">The workspace only becomes a retention mechanic if the product reaches out — not the other way around.</span> This is the piece that turns a passive dashboard into an active habit loop.
+        </p>
+        <ul class="task-list">
+          <li><strong>Build the weekly check-in cron job.</strong> Runs once per week per active session (calculate based on <code>started_at</code>, not calendar Monday — every founder's Week 1 starts on a different day). Pulls that founder's progress via the Progress Calculator.</li>
+          <li><strong>Compose the check-in email via SendGrid.</strong> Content is dynamic: "You've completed 9 of 14 tasks this week. You're 2 days ahead of schedule" or "You've fallen 5 days behind. Here's what's still open." Include a direct link back to the workspace, pre-scrolled to the current week.</li>
+          <li><strong>Log every check-in send to <code>roadmap_sessions.last_checkin_at</code>.</strong> Needed both for scheduling the next one and for a future analytics view on engagement.</li>
+          <li><strong>Add an unsubscribe/pause option.</strong> A founder who wants to stop weekly emails should be able to without abandoning the roadmap itself. Add <code>status: paused</code> to stop check-ins but preserve all task data.</li>
+        </ul>
+        <div class="gate">
+          <div class="gate-label">Sprint 1.3 Exit Gate</div>
+          <p>
+            A test session artificially set to Week 2 triggers exactly one check-in email with the correct dynamic progress numbers. Running the cron job twice in the same week does not send a duplicate.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Sprint 1.4</div>
+    <div class="sprint">
+      <div class="sprint-header">
+        <div class="sprint-num">S-1.4</div>
+        <div class="sprint-title">Antigravity Workspace UI</div>
+        <div class="sprint-dur">WEEK 3–4 · Frontend Engineer</div>
+      </div>
+      <div class="sprint-body">
+        <p>
+          <span class="hl">Four views. Build them in this order — each depends on the API from Sprints 1.1–1.2, not on each other.</span>
+        </p>
+        <ul class="task-list">
+          <li><strong>View 1 — Weekly Kanban Board.</strong> Default landing view. 13 columns (weeks 1–13), each showing that week's tasks as checkable cards. Clicking a checkbox calls <code>PATCH /workspace/tasks/{id}</code> and optimistically updates the UI before the network call confirms.</li>
+          <li><strong>View 2 — Progress Ring.</strong> A single circular progress indicator showing overall completion percentage, pinned to the top of the workspace. Updates in real time as tasks are checked.</li>
+          <li><strong>View 3 — Slippage Banner.</strong> Conditionally rendered above the kanban board only when <code>slippage_days &gt; 2</code>. Copy: "You're {slippage_days} days behind schedule. {N} tasks from earlier weeks are still open." Include a "Jump to oldest open task" button.</li>
+          <li><strong>View 4 — Milestone Markers.</strong> At the end of weeks 4, 8, and 12, render a distinct milestone card summarizing what should be true by that point (per the Builder's original roadmap framing) — e.g., "By end of Week 4, you should have validated pricing with 10 real prospects." This anchors the day-by-day grind to larger checkpoints.</li>
+        </ul>
+        <div class="gate">
+          <div class="gate-label">Sprint 1.4 Exit Gate</div>
+          <p>
+            Full workspace renders correctly for a test session with a mix of complete, pending, and skipped tasks. Checking a box updates the progress ring within 1 second without a full page reload. Slippage banner correctly appears and disappears based on live data.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Deliverables Checklist</div>
+    <table class="del-table">
+      <thead>
+        <tr><th>Deliverable</th><th>Owner</th><th>Week Due</th><th>Exit Criteria</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>roadmap_sessions + roadmap_tasks schema</td><td class="owner">Eng 2</td><td>W1</td><td>90 rows persisted per validated session, zero gaps</td></tr>
+        <tr><td>Pipeline hook: persist_roadmap()</td><td class="owner">Eng 2</td><td>W1</td><td>Runs automatically after Agent 05 completes</td></tr>
+        <tr><td>GET /workspace/{id} + PATCH /workspace/tasks/{id}</td><td class="owner">Eng 2</td><td>W2</td><td>Task state updates persist and return correct progress</td></tr>
+        <tr><td>Progress Calculator (completion % + slippage)</td><td class="owner">Eng 2</td><td>W2</td><td>Slippage math verified against backdated test session</td></tr>
+        <tr><td>Daily current_day cron job</td><td class="owner">Eng 2</td><td>W2</td><td>Advances correctly across timezones without duplication</td></tr>
+        <tr><td>Weekly check-in email scheduler</td><td class="owner">Eng 2</td><td>W3</td><td>One email per session per week, dynamic content, no duplicates</td></tr>
+        <tr><td>Kanban Board + Progress Ring (Antigravity)</td><td class="owner">FE Eng</td><td>W4</td><td>Checkbox interaction updates UI in &lt;1s</td></tr>
+        <tr><td>Slippage Banner + Milestone Markers</td><td class="owner">FE Eng</td><td>W4</td><td>Conditional rendering verified against live and test data</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Success Metrics</div>
+    <div class="criteria-grid">
+      <div class="criteria-card"><div class="criteria-num">90</div><div class="criteria-label">Tasks Persisted, Zero Gaps</div></div>
+      <div class="criteria-card"><div class="criteria-num">&lt;1s</div><div class="criteria-label">Checkbox → Progress Update Latency</div></div>
+      <div class="criteria-card"><div class="criteria-num">100%</div><div class="criteria-label">Weekly Check-ins Sent, No Duplicates</div></div>
+      <div class="criteria-card"><div class="criteria-num">D7</div><div class="criteria-label">Target: Founder Returns By Day 7</div></div>
+      <div class="criteria-card"><div class="criteria-num">0</div><div class="criteria-label">Changes to Builder Agent Logic</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">What Comes After This Sprint</div>
+    <div class="card">
+      <div class="card-title">Do Not Build Yet</div>
+      <p>
+        Pivot history, shareable certificates, team workspaces, and the Execution Coach Agent all depend on this workspace existing first. Do not parallelize them. A founder cannot have a "pivot history" if there's no persistent execution state to compare against. Ship this sprint, confirm founders actually return on Day 7, then move to the next Phase 2 item.
+      </p>
+    </div>
+  </section>
+
+  <hr/>
+  <footer class="footer">
+    <span>AI DUE DILIGENCE LAYER — PHASE 2 · SPRINT 1 PRD</span>
+    <span>Living Execution Workspace</span>
+    <span>ENGINEER-READY · CONFIDENTIAL</span>
+  </footer>
+
+</div>
+</body>
+</html>
